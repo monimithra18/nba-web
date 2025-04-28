@@ -1,25 +1,27 @@
-from flask import Flask, request, render_template
-import psycopg2
 import os
-import socket
+import psycopg2
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
-# Supabase PostgreSQL credentials from environment variables
-DB_HOST = os.environ.get('DB_HOST')
-DB_NAME = os.environ.get('DB_NAME')
-DB_USER = os.environ.get('DB_USER')
-DB_PASS = os.environ.get('DB_PASS')
-DB_PORT = os.environ.get('DB_PORT', 5432)
+# Railway database credentials
+DB_HOST = os.getenv('DB_HOST', 'your_host_from_railway')
+DB_NAME = os.getenv('DB_NAME', 'your_db_name')
+DB_USER = os.getenv('DB_USER', 'your_db_user')
+DB_PASS = os.getenv('DB_PASS', 'your_db_password')
+DB_PORT = os.getenv('DB_PORT', '5432')
 
-# 🔥 DEBUG: Print all database environment values
-print("\n=== DATABASE CONFIGURATION ===")
-print(f"DB_HOST: {DB_HOST}")
-print(f"DB_NAME: {DB_NAME}")
-print(f"DB_USER: {DB_USER}")
-print(f"DB_PASS: {DB_PASS}")
-print(f"DB_PORT: {DB_PORT}")
-print("===============================\n")
+def get_db_connection():
+    conn = psycopg2.connect(
+        host=DB_HOST,
+        database=DB_NAME,
+        user=DB_USER,
+        password=DB_PASS,
+        port=DB_PORT
+    )
+    return conn
+
+# rest of your app
 
 @app.route('/', methods=['GET', 'POST'])
 def index():

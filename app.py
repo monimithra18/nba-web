@@ -12,6 +12,15 @@ DB_USER = os.environ.get('DB_USER')
 DB_PASS = os.environ.get('DB_PASS')
 DB_PORT = os.environ.get('DB_PORT', 5432)
 
+# 🔥 DEBUG: Print all database environment values
+print("\n=== DATABASE CONFIGURATION ===")
+print(f"DB_HOST: {DB_HOST}")
+print(f"DB_NAME: {DB_NAME}")
+print(f"DB_USER: {DB_USER}")
+print(f"DB_PASS: {DB_PASS}")
+print(f"DB_PORT: {DB_PORT}")
+print("===============================\n")
+
 @app.route('/', methods=['GET', 'POST'])
 def index():
     result = None
@@ -20,16 +29,18 @@ def index():
     if request.method == 'POST':
         sql = request.form['sql']
         try:
-            # Resolve host to IPv4 manually
+            # 🔥 DEBUG: Try resolving DB_HOST to IPv4
+            print(f"Trying to resolve {DB_HOST} to IPv4 address...")
             ipv4_host = socket.gethostbyname(DB_HOST)
+            print(f"Resolved IPv4 address: {ipv4_host}")
 
             conn = psycopg2.connect(
-                host=ipv4_host,       # Now using IPv4
+                host=ipv4_host,
                 dbname=DB_NAME,
                 user=DB_USER,
                 password=DB_PASS,
                 port=DB_PORT,
-                options='-c statement_timeout=10000'  # Optional: query timeout setting
+                options='-c statement_timeout=10000'
             )
             cur = conn.cursor()
             cur.execute(sql)
@@ -38,6 +49,7 @@ def index():
             cur.close()
             conn.close()
         except Exception as e:
+            print(f"🔥 ERROR during query execution: {e}")
             error = str(e)
     return render_template('index.html', headers=headers, result=result, error=error)
 

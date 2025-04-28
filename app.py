@@ -1,16 +1,17 @@
+
 from flask import Flask, request, render_template
 import psycopg2
+import os
 
 app = Flask(__name__)
 
-# Supabase PostgreSQL credentials (replace with your actual values)
-DB_HOST = 'db.erdhktauqqvehhhhczds.supabase.co'
-DB_NAME = 'postgres'
-DB_USER = 'postgres'
-DB_PASS = '281803'
-DB_PORT = 5432
+# Supabase PostgreSQL credentials from Environment Variables
+DB_HOST = os.environ.get('DB_HOST')
+DB_NAME = os.environ.get('DB_NAME')
+DB_USER = os.environ.get('DB_USER')
+DB_PASS = os.environ.get('DB_PASS')
+DB_PORT = os.environ.get('DB_PORT', 5432)  # Default port 5432
 
-# Function to run a SQL query
 def run_query(sql):
     conn = psycopg2.connect(
         host=DB_HOST,
@@ -27,7 +28,6 @@ def run_query(sql):
     conn.close()
     return headers, rows
 
-# Home route with query input
 @app.route('/', methods=['GET', 'POST'])
 def index():
     result = None

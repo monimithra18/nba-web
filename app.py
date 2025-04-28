@@ -1,44 +1,33 @@
-import os
-import psycopg2
 from flask import Flask, request, render_template
+import psycopg2
+import pandas as pd
+import os
 
 app = Flask(__name__)
 
-# Load DB credentials from environment
-DB_HOST = os.getenv('DB_HOST')
-DB_NAME = os.getenv('DB_NAME')
-DB_USER = os.getenv('DB_USER')
-DB_PASS = os.getenv('DB_PASS')
-DB_PORT = os.getenv('DB_PORT', 5432)
-
 def get_db_connection():
     conn = psycopg2.connect(
-        host=DB_HOST,
-        database=DB_NAME,
-        user=DB_USER,
-        password=DB_PASS,
-        port=DB_PORT
+        host=os.environ['DB_HOST'],
+        database=os.environ['DB_NAME'],
+        user=os.environ['DB_USER'],
+        password=os.environ['DB_PASSWORD'],
+        port=os.environ.get('DB_PORT', 5432)  # default 5432
     )
     return conn
 
 @app.route('/', methods=['GET', 'POST'])
-def home():
+def index():
     result = None
-    error = None
+    query = ""
     if request.method == 'POST':
         query = request.form['query']
         try:
             conn = get_db_connection()
-            cur = conn.cursor()
-            cur.execute(query)
-            if query.lower().strip().startswith('select'):
-                result = cur.fetchall()
-            conn.commit()
-            cur.close()
+            result = pd.read_sql_query(query, conn)
             conn.close()
         except Exception as e:
-            error = str(e)
-    return render_template('index.html', result=result, error=error)
+            result = str(e)
+    return render_template('index.html', result=result, query=query)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=3000)
